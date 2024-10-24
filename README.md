@@ -1,13 +1,83 @@
-# DonaChain
+# Hello NEAR Contract
 
-Descripción del Proyecto
-Nuestro proyecto aborda un problema crucial en el ámbito de las donaciones benéficas: La falta de confianza y transparencia. 
-Muchas personas están desmotivadas a donar porque no tienen la claridad y franqueza sobre cómo se utilizan sus contribuciones, lo que genera incertidumbre y preocupación sobre la gestión de los fondos. 
-En muchos casos, los donantes no pueden rastrear el impacto de sus donaciones ni saber si realmente han llegado a las causas que están destinadas apoyar. 
-Esto minimiza la confianza en las organizaciones benéficas y reduce el flujo de contribuciones a proyectos que necesitan apoyo urgente.
-La solución que proponemos es una plataforma descentralizada que combina inteligencia artificial (IA) y blockchain para garantizar transparencia, seguridad y eficiencia. 
-La plataforma incluirá un agente de IA, integrado como un chatbox interactivo en la interfaz de usuario, mismo que permitirá a los donantes realizar consultas específicas sobre el destino de sus aportaciones. 
-Los donantes podrán ingresar datos como el monto, la causa a la que desean contribuir o el destinatario de los fondos, y el agente de IA procesará esta información para rastrear en tiempo real el estado de la donación.
-El uso de blockchain asegura que cada transacción sea registrada de manera transparente y pública, lo que elimina el riesgo de manipulaciones o intermediarios no confiables. 
-Cada donación estará respaldada por contratos inteligentes, que ejecutarán automáticamente las reglas acordadas y proporcionarán a los donantes una vista detallada de cómo, cuándo y dónde se utilizan sus fondos. 
-Esto significa que los donantes podrán confirmar en cualquier momento si su dinero ha llegado al destino correcto y cómo está siendo utilizado para generar impacto en las causas que apoyan.
+The smart contract exposes two methods to enable storing and retrieving a greeting in the NEAR network.
+
+```ts
+@NearBindgen({})
+class HelloNear {
+  greeting: string = "Hello";
+
+  @view // This method is read-only and can be called for free
+  get_greeting(): string {
+    return this.greeting;
+  }
+
+  @call // This method changes the state, for which it cost gas
+  set_greeting({ greeting }: { greeting: string }): void {
+    // Record a log permanently to the blockchain!
+    near.log(`Saving greeting ${greeting}`);
+    this.greeting = greeting;
+  }
+}
+```
+
+<br />
+
+# Quickstart
+
+1. Make sure you have installed [node.js](https://nodejs.org/en/download/package-manager/) >= 16.
+2. Install the [`NEAR CLI`](https://github.com/near/near-cli#setup)
+
+<br />
+
+## 1. Build and Test the Contract
+You can automatically compile and test the contract by running:
+
+```bash
+npm run build
+```
+
+<br />
+
+## 2. Create an Account and Deploy the Contract
+You can create a new account and deploy the contract by running:
+
+```bash
+near create-account <your-account.testnet> --useFaucet
+near deploy <your-account.testnet> build/release/hello_near.wasm
+```
+
+<br />
+
+
+## 3. Retrieve the Greeting
+
+`get_greeting` is a read-only method (aka `view` method).
+
+`View` methods can be called for **free** by anyone, even people **without a NEAR account**!
+
+```bash
+# Use near-cli to get the greeting
+near view <your-account.testnet> get_greeting
+```
+
+<br />
+
+## 4. Store a New Greeting
+`set_greeting` changes the contract's state, for which it is a `call` method.
+
+`Call` methods can only be invoked using a NEAR account, since the account needs to pay GAS for the transaction.
+
+```bash
+# Use near-cli to set a new greeting
+near call <your-account.testnet> set_greeting '{"greeting":"howdy"}' --accountId <your-account.testnet>
+```
+
+**Tip:** If you would like to call `set_greeting` using another account, first login into NEAR using:
+
+```bash
+# Use near-cli to login your NEAR account
+near login
+```
+
+and then use the logged account to sign the transaction: `--accountId <another-account>`.
